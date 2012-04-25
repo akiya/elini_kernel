@@ -277,7 +277,21 @@ void __init msm_add_kgsl_device(void)
 	kgsl_pdata.set_grp3d_async = NULL;
 	kgsl_pdata.imem_clk_name = "imem_clk";
 	kgsl_pdata.grp3d_clk_name = "grp_clk";
-	kgsl_pdata.grp2d_clk_name = NULL;
+	kgsl_pdata.grp3d_pclk_name = "grp_pclk";
+	kgsl_pdata.grp2d0_clk_name = NULL;
+	kgsl_pdata.idle_timeout_3d = HZ/5;
+	kgsl_pdata.idle_timeout_2d = 0;
+
+#ifdef CONFIG_KGSL_PER_PROCESS_PAGE_TABLE
+	kgsl_pdata.pt_va_size = SZ_32M;
+	/* Maximum of 32 concurrent processes */
+	kgsl_pdata.pt_max_count = 32;
+#else
+	kgsl_pdata.pt_va_size = SZ_128M;
+	/* We only ever have one pagetable for everybody */
+	kgsl_pdata.pt_max_count = 1;
+#endif
+
 #endif
 
 	platform_device_register(&msm_device_kgsl);
@@ -306,7 +320,7 @@ static struct android_pmem_platform_data android_pmem_pdata = {
 static struct android_pmem_platform_data android_pmem_adsp_pdata = {
 	.name = "pmem_adsp",
 	.allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
-	.cached = 0,
+	.cached = 1,
 };
 
 static struct android_pmem_platform_data android_pmem_audio_pdata = {
